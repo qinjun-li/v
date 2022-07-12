@@ -14,6 +14,7 @@ case class VectorParameters(ELEN: Int = 32, VLEN: Int = 128, lane: Int = 4) {
   val VLMax: Int = VLEN
   val groupSize: Int = VLMax / lane
   val groupSizeBits: Int = log2Ceil(groupSize)
+  val idBits: Int = log2Ceil(lane)
 
   def lanePopCountParameter: LanePopCountParameter = LanePopCountParameter(ELEN, elenBits)
   def laneFFOParameter: LaneFFOParameter = LaneFFOParameter(ELEN, ELEN)
