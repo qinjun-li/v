@@ -1,6 +1,7 @@
 package v
 
 import chisel3._
+import chisel3.internal.sourceinfo.SourceInfo
 import chisel3.util._
 
 class LaneReq(param: VectorParameters) extends Bundle {
@@ -38,8 +39,17 @@ class LaneDecodeResult extends Bundle {
 
   // - operand1?
   val sub1: Bool = Bool()
+  val sub2: Bool = Bool()
 
   val subUop: UInt = UInt(3.W)
+}
+
+class LaneSrcResult(param: VectorParameters) extends Bundle {
+  val src0: UInt = UInt(param.ELEN.W)
+  val src1: UInt = UInt(param.ELEN.W)
+  val src2: UInt = UInt(param.ELEN.W)
+  val src3: UInt = UInt(2.W)
+  val desMask: UInt = UInt(param.ELEN.W)
 }
 
 class Lane(param: VectorParameters) extends Module {
@@ -51,7 +61,8 @@ class Lane(param: VectorParameters) extends Module {
   // sew
   /*val sewByteMask: UInt = (1.U << req.bits.sew).asUInt - 1.U
   val sewBitMask: UInt = FillInterleaved(8, sewByteMask)*/
-  Seq.tabulate(4) {sew =>
+  val LaneSrcVec: Vec[LaneSrcResult] = VecInit(Seq.tabulate(4) { sew =>
+    val res = WireDefault(0.U.asTypeOf(new LaneSrcResult(param)))
     val significantBit = 1 << (sew + 3)
     val remainder = 64 - significantBit
 
@@ -64,11 +75,26 @@ class Lane(param: VectorParameters) extends Module {
     /*val sign2 = req.bits.src(2)(significantBit - 1)
     val osc2 = Fill(remainder, sign2) ## req.bits.src(2)(significantBit - 1, 0)*/
 
-    // op0 - op1
-    val SubtractionOperand: UInt = osc1 ^ Fill(64, decodeRes.sub1)
+    // op0 - op1 (- op2)
+    val SubtractionOperand1: UInt = osc1 ^ Fill(64, decodeRes.sub1)
+    val SubtractionOperand2: UInt = req.bits.src(2) ^ Fill(64, decodeRes.sub2)
 
+    // - op1 = ~op1 + 1
+    val negativeCompensation: UInt = (!req.bits.maskOP2 & decodeRes.sub1 & decodeRes.sub2) ##
+      ((req.bits.maskOP2 && req.bits.src(2)(0)) || (!req.bits.maskOP2 & (decodeRes.sub1 ^ decodeRes.sub2)))
+    res.src0 := osc0
+    res.src1 := SubtractionOperand1
+    res.src2 := SubtractionOperand2
+    res.src3 := negativeCompensation
+    // todo handle w n
+    res.desMask := ((1 << sew) - 1).U(param.ELEN.W)
+    res
+  })
 
-  }
+  val srcSelect: LaneSrcResult = Mux1H(UIntToOH(req.bits.sew), LaneSrcVec)
+
+  // alu
+  val logicUnit: LaneLogic = Module(new LaneLogic(param.laneLogicParam))
   resp <> DontCare
   req <> DontCare
 }
