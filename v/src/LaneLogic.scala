@@ -2,9 +2,7 @@ package v
 
 import chisel3._
 
-case class LaneLogicParam(dataWidth: Int)
-
-class LaneLogic(param: LaneLogicParam) extends Module {
+class LaneLogic(param: DataPathParam) extends Module {
   val src:    Vec[UInt] = IO(Input(Vec(2, UInt(param.dataWidth.W))))
   val opcode: UInt = IO(Input(UInt(3.W)))
   val resp:   UInt = IO(Output(UInt(param.dataWidth.W)))
