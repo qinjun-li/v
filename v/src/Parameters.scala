@@ -11,7 +11,7 @@ case class DataPathParam(dataWidth: Int) {
   * @param VLEN 向量寄存器的宽度
   * @param lane lane的个数
   */
-case class LaneParameters(ELEN: Int = 32, VLEN: Int = 128, lane: Int = 4) {
+case class LaneParameters(ELEN: Int = 64, VLEN: Int = 128, lane: Int = 4) {
   // lane param
   val addRespWidth: Int = ELEN + 1
   val mulRespWidth: Int = ELEN * 2

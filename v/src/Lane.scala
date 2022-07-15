@@ -1,7 +1,6 @@
 package v
 
 import chisel3._
-import chisel3.internal.sourceinfo.SourceInfo
 import chisel3.util._
 
 class LaneReq(param: LaneParameters) extends Bundle {
@@ -15,10 +14,12 @@ class LaneReq(param: LaneParameters) extends Bundle {
   val sign: Bool = Bool()
   val maskOP2: Bool = Bool()
   val maskDestination: Bool = Bool()
+  val rm: UInt = UInt(2.W)
 }
 
 class LaneResp(param: LaneParameters) extends Bundle {
-  val mask: UInt = UInt(4.W)
+  val res: UInt = UInt(param.ELEN.W)
+  val carry: UInt = UInt(param.ELEN.W)
 }
 
 class LaneDecodeResult extends Bundle {
@@ -28,7 +29,7 @@ class LaneDecodeResult extends Bundle {
   val shift: Bool = Bool()
   val mul: Bool = Bool()
   val div: Bool = Bool()
-  val poCount: Bool = Bool()
+  val popCount: Bool = Bool()
   val ffo: Bool = Bool()
   val getIndex: Bool = Bool()
   val dataProcessing: Bool = Bool()
@@ -65,7 +66,7 @@ class Lane(param: LaneParameters) extends Module {
   val LaneSrcVec: Vec[LaneSrcResult] = VecInit(Seq.tabulate(4) { sew =>
     val res = WireDefault(0.U.asTypeOf(new LaneSrcResult(param)))
     val significantBit = 1 << (sew + 3)
-    val remainder = 64 - significantBit
+    val remainder = param.ELEN - significantBit + 1
 
     // handle sign bit
     val sign0 = req.bits.src(0)(significantBit - 1) && decodeRes.s0
@@ -137,6 +138,38 @@ class Lane(param: LaneParameters) extends Module {
 
   // div
   val divInput: LaneSrcResult = Mux(decodeRes.div, srcSelect, 0.U.asTypeOf(srcSelect))
-  resp <> DontCare
-  req <> DontCare
+  div.srcVec.bits := VecInit(Seq(divInput.src0, divInput.src1))
+  div.mask := divInput.mask
+  div.sign := decodeRes.subUop(0)
+  div.div := decodeRes.subUop(1)
+  resultVec(4) := Mux(decodeRes.div, div.resp.bits, 0.U)
+
+  // pop count
+  val popCountInput: LaneSrcResult = Mux(decodeRes.popCount, srcSelect, 0.U.asTypeOf(srcSelect))
+  popCount.src := popCountInput.src0
+  resultVec(5) := Mux(decodeRes.popCount, popCount.resp, 0.U)
+
+  // find first one
+  val ffoInput: LaneSrcResult = Mux(decodeRes.ffo, srcSelect, 0.U.asTypeOf(srcSelect))
+  ffo.src := ffoInput.src0
+  ffo.resultSelect := decodeRes.subUop
+  resultVec(6) := Mux(decodeRes.ffo, ffo.resp.bits, 0.U)
+
+  // index
+  getID.groupIndex := req.bits.groupIndex
+  getID.laneIndex := req.bits.index
+  resultVec(7) := Mux(decodeRes.getIndex, getID.resp, 0.U)
+
+  dp.in.src := resultVec.reduce(_ | _)
+  dp.in.sign := decodeRes.s0
+  dp.in.mask := srcSelect.desMask
+  dp.in.rm := req.bits.rm
+  dp.in.rSize.valid := decodeRes.dataProcessing
+  dp.in.rSize.bits := Mux(decodeRes.subUop(2), req.bits.src(1), 1.U)
+
+  req.ready := (!decodeRes.div) || div.srcVec.ready
+  resp.valid := (!decodeRes.div) || div.resp.valid
+  resp.bits.res := dp.resp
+  resp.bits.carry := carryRes
+  div.srcVec.valid := req.valid & decodeRes.div
 }
