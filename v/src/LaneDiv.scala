@@ -4,8 +4,9 @@ import chisel3._
 import chisel3.util._
 
 class LaneDiv(param: DataPathParam) extends Module {
-  val srcVec: DecoupledIO[Vec[UInt]] = IO(Decoupled(Vec(2, UInt(param.dataWidth.W))))
+  val srcVec: DecoupledIO[Vec[UInt]] = IO(Flipped(Decoupled(Vec(2, UInt(param.dataWidth.W)))))
   val sign: Bool = IO(Input(Bool()))
+  val div: Bool = IO(Input(Bool()))
   // mask for sew
   val mask: UInt = IO(Input(UInt(param.dataWidth.W)))
   val resp: ValidIO[UInt] = IO(Valid(UInt(param.dataWidth.W)))
