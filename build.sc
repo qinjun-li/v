@@ -13,6 +13,7 @@ import $file.dependencies.`chisel-testers2`.build
 import $file.dependencies.cde.build
 import $file.dependencies.`berkeley-hardfloat`.build
 import $file.dependencies.`rocket-chip`.common
+import $file.dependencies.arithmetic.build
 
 // Global Scala Version
 object ivys {
@@ -554,8 +555,16 @@ object pk extends Module {
 
 // Dummy
 
+object myarithmetic extends dependencies.arithmetic.build.arithmeticCrossModule(ivys.sv) {
+  override def millSourcePath = os.pwd /  "dependencies" / "arithmetic"
+
+  def chisel3Module: Option[PublishModule] = Some(mychisel3)
+
+  def chiseltestModule: Option[PublishModule] = Some(mychiseltest)
+}
+
 object v extends CommonModule {
-  override def moduleDeps = super.moduleDeps ++ Seq(myrocketchip, mychiseltest)
+  override def moduleDeps = super.moduleDeps ++ Seq(myrocketchip, myarithmetic)
 
   // add some scala ivy module you like here.
   override def ivyDeps = Agg(
