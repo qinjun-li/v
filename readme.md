@@ -13,7 +13,7 @@ To use this repo as your Chisel development environment, simply follow the steps
 0. Clone this repo;
 
 ```bash
-git clone git@github.com:sequencer/playground.git
+git clone git@github.com:chipsalliance/playground.git
 ```
 
 0. Install dependencies and setup environments:
@@ -78,20 +78,14 @@ then open by your favorite IDE, which supports [BSP](https://build-server-protoc
 Philosophy of this repository is **fast break and fast fix**.
 This repository always tracks remote developing branches, it may need some patches to work, `make patch` will append below in sequence:
 <!-- BEGIN-PATCH -->
-cva6-wrapper https://github.com/ucb-bar/cva6-wrapper/pull/15  
 chipyard https://github.com/ucb-bar/chipyard/pull/1160  
 dsptools https://github.com/ucb-bar/dsptools/pull/240  
-riscv-sodor https://github.com/ucb-bar/riscv-sodor/pull/72  
-riscv-boom https://github.com/riscv-boom/riscv-boom/pull/600  
-riscv-boom https://github.com/riscv-boom/riscv-boom/pull/601  
-rocket-chip https://github.com/chipsalliance/rocket-chip/pull/2968  
-rocket-chip-blocks https://github.com/chipsalliance/rocket-chip-blocks/pull/1  
+rocket-chip https://github.com/chipsalliance/rocket-chip/pull/2968      
+rocket-chip https://github.com/chipsalliance/rocket-chip/pull/3013      
 rocket-chip-blocks https://github.com/chipsalliance/rocket-chip-blocks/pull/2  
-rocket-chip-blocks https://github.com/chipsalliance/rocket-chip-blocks/pull/3  
 rocket-chip-fpga-shells https://github.com/chipsalliance/rocket-chip-fpga-shells/pull/1  
 rocket-chip-fpga-shells https://github.com/chipsalliance/rocket-chip-fpga-shells/pull/2  
 rocket-chip-fpga-shells https://github.com/chipsalliance/rocket-chip-fpga-shells/pull/3  
-rocket-chip-inclusive-cache https://github.com/chipsalliance/rocket-chip-inclusive-cache/pull/2  
 rocket-dsp-utils https://github.com/ucb-bar/rocket-dsp-utils/pull/6  
 <!-- END-PATCH -->
 
@@ -104,7 +98,7 @@ rocket-dsp-utils https://github.com/ucb-bar/rocket-dsp-utils/pull/6
 So generally, this repo is the fast and cleanest way to start your Chisel project codebase.
 
 ## Always keep update-to-date
-You can use this template and start your own job by appending commits on it. GitHub Action will automatically bump all dependencies, you can merge or rebase `sequencer/master` to your branch.
+You can use this template and start your own job by appending commits on it. GitHub Action will automatically bump all dependencies, you can merge or rebase `chipsalliance/master` to your branch.
 
 ```bash
 cd playground # entry your project directory
