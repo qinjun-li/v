@@ -556,9 +556,17 @@ object pk extends Module {
 // Dummy
 
 object myarithmetic extends dependencies.arithmetic.build.arithmeticCrossModule(ivys.sv) {
-  override def millSourcePath = os.pwd /  "dependencies" / "arithmetic"
+  override def millSourcePath = os.pwd /  "dependencies" / "arithmetic" / "arithmetic"
 
   def chisel3Module: Option[PublishModule] = Some(mychisel3)
+
+  override def scalacPluginClasspath = T { super.scalacPluginClasspath() ++ Agg(
+    mychisel3.plugin.jar()
+  ) }
+
+  override def scalacOptions = T {
+    super.scalacOptions() ++ Agg(s"-Xplugin:${mychisel3.plugin.jar().path}", "-P:chiselplugin:genBundleElements")
+  }
 
   def chiseltestModule: Option[PublishModule] = Some(mychiseltest)
 }
