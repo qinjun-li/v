@@ -16,11 +16,11 @@ To use this repo as your Chisel development environment, simply follow the steps
 git clone git@github.com:sequencer/playground.git
 ```
 
-0. Install dependencies and setup environments:
+1. Install dependencies and setup environments:
 - Arch Linux `pacman -Syu --noconfirm make parallel wget cmake ninja mill dtc verilator git llvm clang lld protobuf antlr4 numactl`
 - Nix `nix-shell`
 
-0. [Optional] Remove unused dependences to accelerate bsp compile in `build.sc` `playground.moduleDeps`;
+2. [Optional] Remove unused dependences to accelerate bsp compile in `build.sc` `playground.moduleDeps`;
 
 ```bash
 cd playground # entry your project directory
@@ -44,7 +44,7 @@ object playground extends CommonModule {
 ```
 
 
-0. Init and update dependences;
+3. Init and update dependences;
 
 ```bash
 cd playground # entry your project directory
@@ -53,19 +53,19 @@ make patch    # using the correct patches for some repos
 ```
 
 
-0. Generate IDE bsp;
+4. Generate IDE bsp;
 
 ```bash
 make bsp
 ```
 
 
-0. Open your IDE and wait bsp compile;
+5. Open your IDE and wait bsp compile;
 
 ```bash
 idea . # open IDEA at current directory
 ```
-06. Enjory your development with playground :)
+6. Enjory your development with playground :)
 
 ## IDE support
 For mill use
